@@ -61,10 +61,9 @@ function handleSave(record: WeightRecord){
 
 //刪除記錄
 function deleteWeightRecord(id: number){
-  records.value = records.value.filter((record) => record.id !== id)
-  console.log('要刪除的 id：', id);
-  console.log('刪除後：', records.value );
-
+  const proceed = confirm('確定要刪除此筆資料嗎?')
+  if (!proceed) return
+    records.value = records.value.filter((record) => record.id !== id)
 }
 
 //使顯示的日期格式化成方便閱讀的格式
