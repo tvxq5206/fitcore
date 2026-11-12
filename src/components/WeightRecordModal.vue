@@ -84,7 +84,6 @@ function saveRecord(){
     reps: reps.value,
     remark: remark.value
     }
-    console.log(record);
     emit('save', record)
 }
 

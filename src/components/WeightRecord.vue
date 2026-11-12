@@ -28,7 +28,10 @@
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100"><strong>{{ weightRecord.motion }}</strong></td>
                         <td class="py-4 px-5 border-t-1 border-gray-100"><span class="text-sm font-bold rounded-2xl py-0.75 px-2.5 bg-[#c8f13526] text-[#9fbf1a]">{{ weightRecord.muscleGroup }}</span></td>
                         <td class="py-4 px-5 border-t-1 border-gray-100"><span class="text-normal">{{ weightRecord.weightKg }} kg</span></td>
-                        <td class="py-4 px-5 text-sm border-t-1 border-gray-100"><span class="text-gray-400">{{  }} kg</span></td>
+                        <td class="py-4 px-5 text-sm border-t-1 border-gray-100">
+                            <span v-if="getLastRecord(weightRecord)" class="text-gray-400">{{ getLastRecord(weightRecord)?.weightKg }} kg</span>
+                            <span v-else>—</span>
+                        </td>
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100"><span class="text-gray-400">{{ formatDate(weightRecord.recordedAt) }}</span></td>
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100">↑ +{{  }}kg</td>
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100">{{ weightRecord.remark }}</td>
@@ -57,6 +60,10 @@ function openWeightRecord(){
 function handleSave(record: WeightRecord){
   records.value.push(record)
   isWeightRecordOpen.value = false
+  console.log('剛新增的：', record)
+  console.log('它的上次紀錄：', getLastRecord(record))
+  console.log('趨勢:', getTrend(record));
+  
 }
 
 //刪除記錄
@@ -71,5 +78,20 @@ function formatDate(iso: string){
    return new Date(iso).toLocaleDateString('zh-TW') 
 }
 
+//找上次紀錄
+function getLastRecord(current: WeightRecord){
+    const earlier = records.value.filter((data) => 
+    data.motion === current.motion && data.id < current.id
+    )
+    return earlier[earlier.length -1 ]
+}
+
+//重量趨勢
+function getTrend(current: WeightRecord){
+    const last = getLastRecord(current)
+    if(!last) return //先檢查last(有沒有上次紀錄)有沒有值
+    const trendResult = current.weightKg - last.weightKg
+    return Math.round(trendResult * 10) /10
+}
 
 </script>
