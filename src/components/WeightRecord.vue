@@ -17,6 +17,7 @@
                         <th class="text-start text-gray-400 text-xs py-4 px-5">肌群</th>
                         <th class="text-start text-gray-400 text-xs py-4 px-5">重量記錄</th>
                         <th class="text-start text-gray-400 text-xs py-4 px-5">上次紀錄</th>
+                        <th class="text-start text-gray-400 text-xs py-4 px-5">次數</th>
                         <th class="text-start text-gray-400 text-xs py-4 px-5">更新日期</th>
                         <th class="text-start text-gray-400 text-xs py-4 px-5">趨勢</th>
                         <th class="text-start text-gray-400 text-xs py-4 px-5">備註</th>
@@ -32,8 +33,9 @@
                             <span v-if="getLastRecord(weightRecord)" class="text-gray-400">{{ getLastRecord(weightRecord)?.weightKg }} kg</span>
                             <span v-else>—</span>
                         </td>
+                        <td class="py-4 px-5 text-sm border-t-1 border-gray-100"><span class="text-gray-400">{{ weightRecord.reps }} 次</span></td>
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100"><span class="text-gray-400">{{ formatDate(weightRecord.recordedAt) }}</span></td>
-                        <td class="py-4 px-5 text-sm border-t-1 border-gray-100">↑ +{{  }}kg</td>
+                        <td :class="trendColor(weightRecord)" class="font-bold py-4 px-5 text-sm border-t-1 border-gray-100">{{ formatTrend(weightRecord) }}</td>
                         <td class="py-4 px-5 text-sm border-t-1 border-gray-100">{{ weightRecord.remark }}</td>
                         <td class="py-4 px-5 border-t-1 border-gray-100"><button class="border border-gray-200 cursor-pointer rounded-md py-1.5 px-3 text-gray-600 hover:bg-black hover:text-[#c8f135] hover:border-black" @click="deleteWeightRecord(weightRecord.id)">刪除</button></td>
                     </tr>
@@ -60,10 +62,6 @@ function openWeightRecord(){
 function handleSave(record: WeightRecord){
   records.value.push(record)
   isWeightRecordOpen.value = false
-  console.log('剛新增的：', record)
-  console.log('它的上次紀錄：', getLastRecord(record))
-  console.log('趨勢:', getTrend(record));
-  
 }
 
 //刪除記錄
@@ -83,15 +81,32 @@ function getLastRecord(current: WeightRecord){
     const earlier = records.value.filter((data) => 
     data.motion === current.motion && data.id < current.id
     )
-    return earlier[earlier.length -1 ]
+    return earlier[earlier.length -1]
 }
 
 //重量趨勢
 function getTrend(current: WeightRecord){
     const last = getLastRecord(current)
-    if(!last) return //先檢查last(有沒有上次紀錄)有沒有值
+    if(!last) return null//先檢查last(有沒有上次紀錄)有沒有值
     const trendResult = current.weightKg - last.weightKg
     return Math.round(trendResult * 10) /10
 }
+
+//重量上升減少持平?
+function formatTrend(current: WeightRecord){
+    const trend = getTrend(current)
+    if(trend === null || trend === 0) return `—`
+    if(trend > 0) return `↑ ${trend} kg`
+    if(trend < 0) return `↓ ${Math.abs(trend)} kg`
+}
+
+//改變上升減少持平的文字顏色
+function trendColor(current: WeightRecord){
+    const trend = getTrend(current)
+    if(trend === null || trend === 0) return 'text-gray-400'
+    if(trend > 0) return 'text-[#9fbf1a]'
+    if(trend < 0) return 'text-red-500'
+}
+
 
 </script>
