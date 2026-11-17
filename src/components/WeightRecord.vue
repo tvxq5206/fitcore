@@ -51,17 +51,23 @@ import { ref } from 'vue';
 import WeightRecordModal from './WeightRecordModal.vue';
 import { weightRecords, type WeightRecord } from '../services/WeightRecordServices';
 
-const records = ref<WeightRecord[]>(weightRecords);
+//讀取localStorage
+const saved = localStorage.getItem('weightRecords')
+const records = ref<WeightRecord[]>(
+    saved ? JSON.parse(saved) : weightRecords
+)
 
 const isWeightRecordOpen = ref(false);
 function openWeightRecord(){
     isWeightRecordOpen.value = true;
-};
+}
 
 //收到來自modal送來的紀錄
 function handleSave(record: WeightRecord){
   records.value.push(record)
   isWeightRecordOpen.value = false
+  //存資料到localStorage
+  localStorage.setItem('weightRecords', JSON.stringify(records.value))
 }
 
 //刪除記錄
@@ -69,6 +75,7 @@ function deleteWeightRecord(id: number){
   const proceed = confirm('確定要刪除此筆資料嗎?')
   if (!proceed) return
     records.value = records.value.filter((record) => record.id !== id)
+    localStorage.setItem('weightRecords', JSON.stringify(records.value))
 }
 
 //使顯示的日期格式化成方便閱讀的格式
@@ -107,6 +114,4 @@ function trendColor(current: WeightRecord){
     if(trend > 0) return 'text-[#9fbf1a]'
     if(trend < 0) return 'text-red-500'
 }
-
-
 </script>
