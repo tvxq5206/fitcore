@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import WeightRecordModal from './WeightRecordModal.vue';
 import { weightRecords, type WeightRecord } from '../services/WeightRecordServices';
 
@@ -66,8 +66,6 @@ function openWeightRecord(){
 function handleSave(record: WeightRecord){
   records.value.push(record)
   isWeightRecordOpen.value = false
-  //存資料到localStorage
-  localStorage.setItem('weightRecords', JSON.stringify(records.value))
 }
 
 //刪除記錄
@@ -75,8 +73,14 @@ function deleteWeightRecord(id: number){
   const proceed = confirm('確定要刪除此筆資料嗎?')
   if (!proceed) return
     records.value = records.value.filter((record) => record.id !== id)
-    localStorage.setItem('weightRecords', JSON.stringify(records.value))
 }
+
+//watch
+watch(records, (newRecords) => {
+    //存資料到localStorage，watch監聽會自動儲存到localStorage
+    localStorage.setItem('weightRecords', JSON.stringify(newRecords))
+    console.log('有變動，存檔！')
+}, { deep: true })
 
 //使顯示的日期格式化成方便閱讀的格式
 function formatDate(iso: string){
